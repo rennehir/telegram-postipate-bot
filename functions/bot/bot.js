@@ -53,11 +53,11 @@ const parseKSML = $ => {
 
 const splitContent = content => content.match(/.{1,4096}/g);
 
-exports.handler = (event, context) => {
+exports.handler = (event, context, cb) => {
   try {
     const tmp = JSON.parse(event.body);
     bot.handleUpdate(tmp);
-    return { statusCode: 200, body: '' };
+    cb(null, { statusCode: 200, body: 'OK' });
   } catch (err) {
     return { statusCode: 500, body: err.toString() };
   }
