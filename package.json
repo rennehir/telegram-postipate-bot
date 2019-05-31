@@ -1,0 +1,27 @@
+{
+  "name": "posti-pate-bot",
+  "version": "1.0.0",
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "breakdance": "^3.0.1",
+    "cheerio": "^1.0.0-rc.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "telegraf": "^3.29.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rennehir/telegram-postipate-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rennehir/telegram-postipate-bot/issues"
+  },
+  "homepage": "https://github.com/rennehir/telegram-postipate-bot#readme"
+}
