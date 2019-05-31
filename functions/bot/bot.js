@@ -28,7 +28,7 @@ bot.hears(/www.ksml.fi/, async ctx => {
     ctx.replyWithPhoto(image, { caption });
 
     for (let i = 0; i < content.length; i++) {
-      await ctx.replyWithMarkdown(content[i]);
+      ctx.replyWithMarkdown(content[i]);
     }
   } catch (error) {
     ctx.reply(error.toString());
