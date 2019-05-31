@@ -24,11 +24,10 @@ bot.hears(/www.ksml.fi/, async ctx => {
     const parse = parseKSML;
     const { content, caption, image, title } = parse($);
 
-    await ctx.replyWithMarkdown(`*${title}*`);
-    await ctx.replyWithPhoto(image, { caption });
+    ctx.replyWithMarkdown(`*${title}*`);
+    ctx.replyWithPhoto(image, { caption });
 
     for (let i = 0; i < content.length; i++) {
-      sleep(500);
       await ctx.replyWithMarkdown(content[i]);
     }
   } catch (error) {
@@ -54,16 +53,7 @@ const parseKSML = $ => {
 
 const splitContent = content => content.match(/.{1,4096}/g);
 
-const sleep = milliseconds => {
-  const start = new Date().getTime();
-  for (let i = 0; i < 1e7; i++) {
-    if (new Date().getTime() - start > milliseconds) {
-      break;
-    }
-  }
-};
-
-exports.handler = async (event, context) => {
+exports.handler = (event, context) => {
   try {
     const tmp = JSON.parse(event.body);
     bot.handleUpdate(tmp);
