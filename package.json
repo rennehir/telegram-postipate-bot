@@ -13,7 +13,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "postbuild": "echo 'postbuild!!!!'",
+    "postbuild": "echo \"postbuild!!!!\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
