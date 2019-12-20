@@ -57,11 +57,11 @@ const findUnlockedUrl = $ => {
   }
 };
 
-exports.handler = async (event, context) => {
+exports.handler = (event, context, cb) => {
   try {
     const tmp = JSON.parse(event.body);
     bot.handleUpdate(tmp);
-    return { statusCode: 200, body: 'OK' };
+    cb(null, { statusCode: 200, body: 'OK' });
   } catch (err) {
     return { statusCode: 500, body: err.toString() };
   }
