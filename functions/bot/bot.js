@@ -3,11 +3,14 @@ const URL = require('url').URL;
 const Telegraf = require('telegraf');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const breakdance = require('breakdance');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-bot.hears('hi', ctx => ctx.reply('Hi there!'));
+bot.hears('hi', ctx =>
+  ctx.replyWithMarkdown(
+    'Terve! Minä olen Posti-Pate! Toimitan sinulle artikkelit enkä lakkoile _(välillä menen rikki, mutta sitä ei voi edes liitto estää)_!'
+  )
+);
 
 bot.hears(/www.ksml.fi/, async ctx => {
   const { message } = ctx;
@@ -21,43 +24,44 @@ bot.hears(/www.ksml.fi/, async ctx => {
     const htmlString = await rp(options);
     const $ = cheerio.load(htmlString);
 
-    const parse = parseKSML;
-    const { content, caption, image, title } = parse($);
+    const unlockedUrl = findUnlockedUrl($);
 
-    ctx.replyWithMarkdown(`*${title}*`);
-    ctx.replyWithPhoto(image, { caption });
-
-    for (let i = 0; i < content.length; i++) {
-      ctx.replyWithMarkdown(content[i]);
-    }
+    ctx.deleteMessage(message.message_id);
+    ctx.replyWithMarkdown(`Linkkinne olkaa hyvät:\n${unlockedUrl}`);
   } catch (error) {
-    ctx.reply(error.toString());
+    const { name, statusCode } = error;
+    console.error({ name, statusCode });
+    ctx.replyWithMarkdown(`*${name}:* ${statusCode}`);
   }
 });
 
-const parseKSML = $ => {
-  const content = splitContent(
-    breakdance($('.article-to-paywall > div').html())
-  );
-  const title = $('meta[property="og:title"]').attr('content');
-  const image = $('meta[property="og:image"]').attr('content');
-  const caption = $('.story-picture > figcaption').text();
+const findUnlockedUrl = $ => {
+  try {
+    const comments = $('*')
+      .contents()
+      .filter(function() {
+        return this.nodeType === 8;
+      });
 
-  return {
-    caption,
-    content,
-    image,
-    title
-  };
+    let url;
+
+    comments.each(function() {
+      if (this.data.includes('pwbi')) {
+        url = this.data;
+        return;
+      }
+    });
+    return url ? url : 'URL not found :(';
+  } catch (error) {
+    return 'En löytänyt toimivaa urlia, harmitus :(';
+  }
 };
 
-const splitContent = content => content.match(/.{1,4096}/g);
-
-exports.handler = (event, context, cb) => {
+exports.handler = async (event, context) => {
   try {
     const tmp = JSON.parse(event.body);
     bot.handleUpdate(tmp);
-    cb(null, { statusCode: 200, body: 'OK' });
+    return { statusCode: 200, body: 'OK' };
   } catch (err) {
     return { statusCode: 500, body: err.toString() };
   }
