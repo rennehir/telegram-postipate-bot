@@ -9,21 +9,19 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // Handler for /start command
 bot.start(ctx => {
   ctx.replyWithMarkdown(
-  'Terve! Minä olen Posti-Pate! Toimitan sinulle artikkelit enkä laikkoile _(välillä menen rikki, mutta sitä ei voi edes liitto estää)_!\n\n'+
+  'Terve! Minä olen Posti-Pate! Toimitan sinulle artikkelit enkä lakkoile _(välillä menen rikki, mutta sitä ei voi edes liitto estää)_!\n\n'+
 'Vastaan kun lähetät minulle artikkelin.')
 });
 
 // Handler for /help command
 bot.help(ctx => {
   ctx.replyWithMarkdown(
-    'Toimin kun lähetät minulle linkin osoitteesta:\r\nwww.ksml.fi\n'+
-    'Jos käytät /luetuimmat, kopioi linkki ja lähetä se minulle.'
+    'Toimin kun lähetät minulle linkin osoitteesta:\r\nwww.ksml.fi tai komennolla /luetuimmat'
   );
 })
 
 // Handler for listing top news from www.ksml.fi
 bot.hears(/\/luetuimmat/, async ctx => {
-  
   try {
     // API for "luetuimmat" :D
     const options = {
@@ -32,17 +30,16 @@ bot.hears(/\/luetuimmat/, async ctx => {
     const htmlString = await rp(options);
     const $ = cheerio.load(htmlString);
     
+    bot.telegram.sendChatAction(ctx.message.chat.id, 'typing');
+    
     const topNews = findTopNews($);
     let responseTxt = "*Luetuimmat:*";
-    /*
-      Add unlockedURL to list. It takes way too long, and somehow breaks the inline link?
-      let newURL = await getPwUrl(article.url);
-      responseTxt += `\n*${index+1}.* [${article.title}](${newURL})\n`;
-      */
-    for(let [index, article] of topNews.entries()) {
-      responseTxt += `\n*${index+1}.* [${article.title}](${decodeURIComponent(article.url)})\n`;
-    }
-
+    
+    const promises = topNews.map(article => getPremiumUrl(article));
+    const premiumLinks = await Promise.all(promises);
+    
+    premiumLinks.map((link, index) => responseTxt += `\n*${index+1}.* [${link.title}](${link.url})\n`);
+    
     ctx.replyWithMarkdown(responseTxt, {disable_web_page_preview: true});
   } catch (error) {
     const { name, statusCode, message } = error;
@@ -64,10 +61,10 @@ bot.hears(/www.ksml.fi/, async ctx => {
     const $ = cheerio.load(htmlString);
 
     const unlockedUrl = findUnlockedUrl($);
-    const decodedURI = decodeURIComponent(unlockedUrl);
+    const decodedURI = decodeURIComponent(unlockedUrl).trim();
 
     ctx.deleteMessage(message.message_id);
-    ctx.replyWithMarkdown(`Linkkinne olkaa hyvät:\r\n(${decodedURI})`);
+    ctx.replyWithMarkdown(`Linkkinne olkaa hyvät:\r\n[KSML.fi – PostiPate](${decodedURI})`);
   } catch (error) {
     const { name, statusCode } = error;
     console.error({ name, statusCode });
@@ -116,18 +113,16 @@ const findTopNews = $ => {
   }
 }
 
-// This needs optimization, takes way too long :(
-const getPwUrl = async url => {
+const getPremiumUrl = async article => {
   try {
     const options = {
-      uri: url
+      uri: article.url
     };
     const htmlString = await rp(options);
     const $ = cheerio.load(htmlString);
 
     const unlockedUrl = findUnlockedUrl($);
-    return unlockedUrl;
-    //return decodeURIComponent(unlockedUrl);
+    return { title: article.title, url: decodeURIComponent(unlockedUrl).trim() };
     
 
   } catch (error) {
