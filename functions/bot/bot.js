@@ -5,17 +5,6 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const appName = process.env.PROJECT_NAME;
-const appPort = process.env.PORT;
-const appEnv = process.env.APP_ENV;
-
-// Set webhook
-if(appEnv === "DEV") {
-  bot.telegram.setWebhook(`https://${appName}.glitch.me/webhook`);
-  console.log(`Listening incoming webhook on: https://${appName}.glitch.me/webhook`);
-  // Start Builtin Webhook
-  bot.startWebhook('/webhook', null, appPort);
-}
 
 // Handler for /start command
 bot.start(ctx => {
@@ -46,7 +35,7 @@ bot.hears(/\/luetuimmat/, async ctx => {
     const topNews = findTopNews($);
     let responseTxt = "*Luetuimmat:*";
     
-    const promises = topNews.map(article => getPwUrl(article));
+    const promises = topNews.map(article => getPremiumUrl(article));
     const premiumLinks = await Promise.all(promises);
     
     premiumLinks.map((link, index) => responseTxt += `\n*${index+1}.* [${link.title}](${link.url})\n`);
@@ -124,7 +113,7 @@ const findTopNews = $ => {
   }
 }
 
-const getPwUrl = async article => {
+const getPremiumUrl = async article => {
   try {
     const options = {
       uri: article.url
