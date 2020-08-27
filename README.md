@@ -2,6 +2,16 @@
 
 [Chat with Posti-Pate](https://t.me/postipate_bot)
 
+## Environment variables and secrets
+
+### GitHub Secrets
+
+Set `BOT_TOKEN` and `BOT_URL` secrets, `BOT_URL` being the handler of the bot function.
+
+### Netlify env variables
+
+Set `BOT_TOKEN`.
+
 ## How to dev
 
 ### Install dependencies
@@ -26,4 +36,4 @@ Go to above url in your browser and replace the token and the url. This tells th
 
 ## How to publish
 
-`git push` to this repo starts the build process on Netlify. After that you need to set the webhook again to point to the production url.
+`git push` to this repo starts the build process on Netlify and a GitHub action takes care of setting the bot's webhook url
