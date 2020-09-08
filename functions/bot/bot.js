@@ -59,6 +59,10 @@ bot.hears(/\/luetuimmat/, async ctx => {
 
 bot.hears(/www.ksml.fi/, async ctx => {
   const { message } = ctx;
+  
+  ctx.replyWithMarkdown(`*Olen särki 🐟*`);
+  return;
+  // The way paywall was bypassed earlier does not work anymore...
 
   const url = new URL(message.text);
 
